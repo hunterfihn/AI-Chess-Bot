@@ -66,13 +66,12 @@ def drawBoard(win, selectedPos=None, legalMoves=None, kingPos=None, kingPos2=Non
 
     # Draw coordinates (letters a-h and numbers 1-8) only on the bottom and left sides
     for i in range(columns):
-        letter = font.render(chr(97 + i), True, (255, 255, 255)) #Left side A-H cords
+        letter = font.render(chr(97 + i), True, (255, 255, 255))  # 'a' starts at ASCII 97
         
         # Adjust the y-position for bottom coordinates (closer to the board)
         win.blit(letter, (i * sqSize + sqSize // 2 + 40, height - 40))  # Bottom
 
-        number = font.render(str(8 - i), True, (255, 255, 255)) #Bottom 1-8 cords
-
+        number = font.render(str(8 - i), True, (255, 255, 255))
         # Adjust the y-position for left coordinates (slightly up for centering)
         win.blit(number, (10, i * sqSize + sqSize // 2 + 30))  # Left
 
@@ -193,99 +192,6 @@ def drawText(win, text, position, color=(255, 0, 0), font_size=24):
     text_surface = font.render(text, True, color)
     win.blit(text_surface, position)
 
-
-#Begin AI with minimax
-'''
-pieceValues = {
-        chess.PAWN: 1,
-        chess.KNIGHT: 3,
-        chess.BISHOP: 3,
-        chess.ROOK: 5,
-        chess.QUEEN: 9,
-        chess.KING: 0
-    }
-
-def evalboard(board, pieceValues):
-    if board.is_checkmate():
-        return -9999 if board.turn == chess.WHITE else 9999
-    elif board.is_stalemate() or board.is_insufficient_material() or board.is_fivefold_repetition():
-        return 0
-
-    score = 0
-
-    for pieceType in pieceValues:
-        score += len(board.pieces(pieceType, chess.WHITE)) * pieceValues[pieceType]
-        score -= len(board.pieces(pieceType, chess.BLACK)) * pieceValues[pieceType]
-
-    score += len(list(board.legal_moves)) * 0.1 
-
-
-    center_squares = [chess.E4, chess.E5, chess.D4, chess.D5]
-    for square in center_squares:
-        if board.piece_at(square) is not None:
-            if board.piece_at(square).color == chess.WHITE:
-                score += 0.5
-            else:
-                score -= 0.5
-    
-    return score
-
-def minimax(board, depth, alpha, beta, maxingPlayer):
-    if depth == 0 or board.is_game_over():
-        return evalboard(board, pieceValues)
-    
-    if maxingPlayer:
-        maxEval = -float('inf')
-        for move in board.legal_moves:
-            board.push(move)
-            eval = minimax(board, depth -1, alpha, beta, False)
-            board.pop()
-            maxEval = max(maxEval, eval)
-            alpha = max(alpha, eval)
-            if beta <= alpha:
-                break
-        return maxEval
-    else:
-        minEval = float('inf')
-        for move in board.legal_moves:
-            board.push(move)
-            eval = minimax(board, depth - 1, alpha, beta, True)
-            board.pop()
-            minEval = min(minEval, eval)
-            beta = min(beta, eval)
-            if beta <= alpha:
-                break
-        return minEval
-    
-def getAiMove(board, depth = 5):
-    bestMove = None
-    bestVal = -float('inf')
-    
-    sortedMoves = sorted(board.legal_moves, key = lambda move: evalMove(board, move, pieceValues), reverse = True)
-    for move in sortedMoves:
-        board.push(move)
-        moveVal = minimax(board, depth - 1, -float('inf'), float('inf'), False)
-        board.pop()
-
-        if moveVal > bestVal:
-            bestVal = moveVal
-            bestMove = move
-    
-    return bestMove
-
-def evalMove(board, move, pieceValues):
-    targPiece = board.piece_at(move.to_square)
-    if targPiece:
-        return pieceValues[targPiece.piece_type]
-    return 0
-'''
-
-def updateBoard(window, board, selectedPiece, selectedPos, legalMoves, kingPos, kingpos2, checkState):
-    window.fill((0, 0, 0))
-    drawBoard(window, selectedPos, legalMoves, kingPos, kingpos2, checkState)
-    drawPieces(window, board, selectedPiece, selectedPos)
-    pygame.display.flip()
-
 # Main game loop
 def main():
     global gameEnded
@@ -296,6 +202,7 @@ def main():
     selectedPiece = None
     selectedPos = None
     dragging = False
+    legalMovesVisible = False
     legalMoves = []
 
     run = True
@@ -333,12 +240,6 @@ def main():
                     # Now check if the move is legal and push it to the board
                     if move in board.legal_moves:
                         board.push(move)  # Push the move, either regular or promotion
-                        legalMoves = []
-                        updateBoard(window, board, selectedPiece, selectedPos, legalMoves, kingPos, kingpos2, checkState)
-                        #aiMove = getAiMove(board)
-                        #if aiMove:
-                            #board.push(aiMove)
-                        #updateBoard(window, board, selectedPiece, selectedPos, legalMoves, kingPos, kingpos2, checkState)
 
                 # Reset state
                 selectedPiece = None
@@ -389,5 +290,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-#ai move is in mousebuttonUp
