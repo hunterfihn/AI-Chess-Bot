@@ -40,18 +40,19 @@ class gameState():
                 turn = self.board[r][c][0]
                 if(turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
                     piece = self.board[r][c][1]
-                    if piece == 'P':
-                        self.getPawnMoves(r, c, moves)
-                    elif piece =='R':
-                        self.getRookMoves(r, c, moves)
-                    elif piece =='N':
-                        self.getKnightMoves(r, c, moves)
-                    elif piece =='B':
-                        self.getBishopMoves(r, c, moves)
-                    elif piece =='K':
-                        self.getKingMoves(r, c, moves)
-                    elif piece =='Q':
-                        self.getQueenMoves(r, c, moves)
+                    match piece:
+                        case "P":
+                            self.getPawnMoves(r, c, moves)
+                        case "R":
+                            self.getRookMoves(r, c, moves)
+                        case "N":
+                            self.getKnightMoves(r, c, moves)
+                        case "B":
+                            self.getBishopMoves(r, c, moves)
+                        case "K":
+                            self.getKingMoves(r, c, moves)
+                        case "Q":
+                            self.getQueenMoves(r, c, moves)
         return moves
 
     def getPawnMoves(self, r, c, moves):
