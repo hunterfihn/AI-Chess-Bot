@@ -1,7 +1,7 @@
 import pygame
 import os
 import chess
-import aibot
+import oldEngine.aibot as aibot
 
 # Initialize Pygame
 pygame.init()

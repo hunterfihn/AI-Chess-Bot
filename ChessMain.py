@@ -6,12 +6,15 @@ dimension = 8
 sqSize = height // dimension
 maxFPS = 15
 images = {}
+p.display.set_caption('Chess')
+icon = p.image.load('images/bQ.png')
+p.display.set_icon(icon)
 
 def loadImgs():
     pieces = ['wP', 'wR', 'wN', 'wB', 'wK', 'wQ',
               'bP', 'bR', 'bN', 'bB', 'bK', 'bQ']
     for piece in pieces:
-        images[piece] = p.transform.scale(p.image.load("VideoSeries/vidImages/" + piece + ".png"), (sqSize, sqSize))
+        images[piece] = p.transform.scale(p.image.load("images/" + piece + ".png"), (sqSize, sqSize))
 
 def main():
     p.init()
@@ -46,14 +49,16 @@ def main():
                     playerClicks.append(sqSelected)
                 if len(playerClicks) == 2:
                     move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
-                    print(move.getChessNotation())
                     if move in validMoves:
                         gs.makeMove(move)
+                        print(move.getChessNotation())
                         moveMade = True
-                    sqSelected = ()
-                    playerClicks = []
+                        sqSelected = ()
+                        playerClicks = []
+                    else:
+                        playerClicks = [sqSelected]
             elif e.type == p.KEYDOWN:
-                if e.key == p.K_z:
+                if e.key == p.K_LEFT:
                     gs.undoMove()
                     moveMade = True
 
