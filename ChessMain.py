@@ -10,6 +10,7 @@ images = {}
 p.display.set_caption('Chess')
 icon = p.image.load('images/bQ.png')
 p.display.set_icon(icon)
+#comment solely to make sure everything pushes updated
 
 def loadImgs():
     pieces = ['wP', 'wR', 'wN', 'wB', 'wK', 'wQ',
