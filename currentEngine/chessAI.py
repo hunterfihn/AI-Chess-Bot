@@ -79,7 +79,10 @@ STALEMATE = 0
 DEPTH = 3
 
 
-def findRandomMove(validMoves):
+def findRandomMove(validMoves, returnQueue):
+    returnQueue.put(validMoves[rd.randint(0, len(validMoves) - 1)])
+
+def findRandomMoveNoQueue(validMoves):
     return validMoves[rd.randint(0, len(validMoves) - 1)]
 
 '''
@@ -138,7 +141,7 @@ def greedyMove(gs, validMoves):
 '''
     
 #helper for negamax/minmax
-def findBestMove(gs, validMoves):
+def findBestMove(gs, validMoves, returnQueue):
     global nextMove, counter
     nextMove = None
     rd.shuffle(validMoves)
@@ -147,40 +150,9 @@ def findBestMove(gs, validMoves):
     #negaMax(gs, validMoves, DEPTH, 1 if gs.whiteToMove else -1)
     negaMaxABP(gs, validMoves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
     print(f"Board States Considered: {counter}")
-    return nextMove
+    returnQueue.put(nextMove)
 
-'''
-def findMoveMinMax(gs, validMoves, depth, whiteToMove):
-    global nextMove
-    if depth == 0:
-        return scoreMaterial(gs.board)
-    
-    if whiteToMove:
-        maxScore = -CHECKMATE
-        for move in validMoves:
-            gs.makeMove(move)
-            nextMoves = gs.getValidMoves()
-            score = findMoveMinMax(gs, nextMoves, depth - 1, False)
-            if score > maxScore:
-                maxScore = score
-                if depth == DEPTH:
-                    nextMove = move
-            gs.undoMove()
-        return maxScore
 
-    else:
-        minScore = CHECKMATE
-        for move in validMoves:
-            gs.makeMove(move)
-            nextMoves = gs.getValidMoves()
-            score = findMoveMinMax(gs, nextMoves, depth - 1, True)
-            if score < minScore:
-                minScore = score
-                if depth == DEPTH:
-                    nextMove = move
-            gs.undoMove()
-        return minScore
-'''
 
 def negaMax(gs, validMoves, depth, turnMult):
     global nextMove, counter
@@ -249,16 +221,4 @@ def scoreBoard(gs):
                     score += pieceValues[square[1]] + piecePositionScore * .5
                 elif square[0] == 'b':
                     score -= pieceValues[square[1]] + piecePositionScore * .5
-    return score
-
-
-#old scoring method (basic)
-def scoreMaterial(board):
-    score = 0
-    for row in board:
-        for square in row:
-            if square[0] == 'w':
-                score += pieceValues[square[1]]
-            elif square[0] == 'b':
-                score-= pieceValues[square[1]]
     return score
