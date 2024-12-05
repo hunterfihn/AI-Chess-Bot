@@ -1,4 +1,5 @@
 import random as rd
+import ChessMain
 
 # Game Values
 pieceValues = {
@@ -76,13 +77,7 @@ piecePositionScoresTables = {"N": knightScores,
 
 CHECKMATE = 9999
 STALEMATE = 0
-DEPTH = 4
-
-
-def getDepth(depth):
-    DEPTH = depth
-    print(f"Depth {depth}")
-
+DEPTH = 3
 
 def findRandomMove(validMoves, returnQueue):
     returnQueue.put(validMoves[rd.randint(0, len(validMoves) - 1)])
