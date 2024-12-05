@@ -24,6 +24,7 @@ class gameState():
         self.checkmate = False
         self.stalemate = False
         self.enPassantPossible = ()
+        self.enPassantPossibleLog = [self.enPassantPossible]
 
         self.whiteCastleKingside = True
         self.whiteCastleQueenside = True
@@ -50,17 +51,19 @@ class gameState():
         if move.enPassant:
             self.board[move.startRow][move.toCol] = "--"
         
+        
         if move.pawnPromotion:
             if simulating:
                 self.board[move.toRow][move.toCol] = move.pieceMoved[0] + "Q"
             else:
+                '''
                 print("Please chose your promotion: (Q, R, B, N): ")
                 choice = input()
-                self.board[move.toRow][move.toCol] = move.pieceMoved[0] + choice
+                '''
+                self.board[move.toRow][move.toCol] = move.pieceMoved[0] + "Q"
 
-
-        self.updateCastleRights(move)
-        self.castleRightsLog.append(CastleRights(self.whiteCastleKingside, self.blackCastleKingside, self.whiteCastleQueenside, self.blackCastleQueenside))
+        self.enPassantPossibleLog.append(self.enPassantPossible)
+        
 
         if move.castle:
             if move.toCol - move.startCol == 2:
@@ -70,6 +73,8 @@ class gameState():
                 self.board[move.toRow][move.toCol + 1] = self.board[move.toRow][move.toCol - 2]
                 self.board[move.toRow][move.toCol - 2] = "--"
         
+        self.updateCastleRights(move)
+        self.castleRightsLog.append(CastleRights(self.whiteCastleKingside, self.blackCastleKingside, self.whiteCastleQueenside, self.blackCastleQueenside))
 
     def undoMove(self):
         if len(self.moveLog) != 0:
@@ -84,9 +89,9 @@ class gameState():
             if move.enPassant:
                 self.board[move.toRow][move.toCol] = "--"
                 self.board[move.startRow][move.toCol] = move.pieceCaptured
-                self.enPassantPossible = (move.toRow, move.toCol)
-            if move.pieceMoved[1] =='P' and abs(move.startRow - move.toRow) == 2:
-                self.enPassantPossible = ()
+            
+            self.enPassantPossibleLog.pop()
+            self.enPassantPossible = self.enPassantPossibleLog[-1]
 
             self.castleRightsLog.pop()
             castleRights = self.castleRightsLog[-1]
@@ -278,11 +283,13 @@ class gameState():
             startRow = 6
             backRow = 0
             opColor = 'b'
+            kingRow, kingCol = self.whiteKingLocation
         else:
             moveAmount = 1
             startRow = 1
             backRow = 7
             opColor = 'w'
+            kingRow, kingCol = self.blackKingLocation
         pawnPromotion = False
 
         if self.board[r+moveAmount][c] == "--":
@@ -299,7 +306,26 @@ class gameState():
                         pawnPromotion = True
                     moves.append(Move((r, c), (r+moveAmount, c-1), self.board, pawnPromotion=pawnPromotion))
                 if (r+moveAmount, c - 1) == self.enPassantPossible:
-                    moves.append(Move((r,c), (r+moveAmount, c-1), self.board, enPassant = True))
+                    attackingPiece = blockingPiece = False
+                    if kingRow == r:
+                        if kingCol < c:
+                            insideRange = range(kingCol + 1, c-1)
+                            outsideRange = range(c+1, 8)
+                        else:
+                            insideRange = range(kingCol - 1, c, -1)
+                            outsideRange = range(c-2, -1, -1)
+                        for i in insideRange:
+                            if self.board[r][i] != "--":
+                                blockingPiece = True
+                        for i in outsideRange:
+                            square = self.board[r][i]
+                            if square[0] == opColor and square[1] == "R" or square[1] == "Q":
+                                attackingPiece = True
+                            elif square != "--":
+                                blockingPiece = True
+                    if not attackingPiece or blockingPiece:
+                        moves.append(Move((r,c), (r+moveAmount, c-1), self.board, enPassant = True))
+
         if c+1 <= 7:
             if not piecePinned or pinDirection == (moveAmount, 1):
                 if self.board[r+moveAmount][c+1][0]==opColor:
@@ -307,7 +333,25 @@ class gameState():
                         pawnPromotion = True
                     moves.append(Move((r, c), (r+moveAmount, c+1), self.board, pawnPromotion=pawnPromotion))
                 if (r+moveAmount, c+1) == self.enPassantPossible:
-                    moves.append(Move((r,c), (r+moveAmount, c+1), self.board, enPassant = True))
+                    attackingPiece = blockingPiece = False
+                    if kingRow == r:
+                        if kingCol < c:
+                            insideRange = range(kingCol + 1, c)
+                            outsideRange = range(c+2, 8)
+                        else:
+                            insideRange = range(kingCol - 1, c+1 , -1)
+                            outsideRange = range(c-1, -1, -1)
+                        for i in insideRange:
+                            if self.board[r][i] != "--":
+                                blockingPiece = True
+                        for i in outsideRange:
+                            square = self.board[r][i]
+                            if square[0] == opColor and square[1] == "R" or square[1] == "Q":
+                                attackingPiece = True
+                            elif square != "--":
+                                blockingPiece = True
+                    if not attackingPiece or blockingPiece:
+                        moves.append(Move((r,c), (r+moveAmount, c+1), self.board, enPassant = True))
                     
      
 
@@ -494,6 +538,7 @@ class Move():
         if enPassant:
             self.pieceCaptured = 'bP' if self.pieceMoved == 'wP' else 'wP'
         
+        self.isCapture = self.pieceCaptured != "--"
         self.moveID = self.startRow * 1000  + self.startCol * 100 + self.toRow * 10 + self.toCol
 
     def __eq__(self, other):
@@ -507,3 +552,33 @@ class Move():
 
     def getRankFile(self, r, c):
         return self.colsToFiles[c] + self.rowsToRanks[r]
+    
+    def __str__(self):
+        if self.castle:
+            return "O-O" if self.toCol == 6 else "O-O-O"
+
+        endSquare = self.getRankFile(self.toRow, self.toCol)
+
+        if self.pieceMoved[1] == "P":
+            if self.isCapture:
+                return self.colsToFiles[self.startCol] + "x" + endSquare 
+            else:
+                return endSquare
+            
+        moveString = self.pieceMoved[1]
+        if self.isCapture:
+            moveString += "x"
+        return moveString + endSquare
+
+
+
+
+
+
+
+
+
+
+
+
+
