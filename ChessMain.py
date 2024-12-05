@@ -27,7 +27,6 @@ images = {}
 
 
 def resource_path(relative_path):
-    """ Get the absolute path to a resource, works for development and PyInstaller """
     try:
         # When running as a bundled executable
         base_path = sys._MEIPASS
