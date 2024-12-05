@@ -2,6 +2,9 @@ import pygame as p
 import ChessEngine
 import chessAI
 from multiprocessing import Process, Queue
+import PIL
+import os
+import sys
 import random as rd
 
 boardWidth = boardHeight = 512
@@ -21,15 +24,30 @@ dimension = 8
 sqSize = boardHeight // dimension
 maxFPS = 15
 images = {}
+
+
+def resource_path(relative_path):
+    """ Get the absolute path to a resource, works for development and PyInstaller """
+    try:
+        # When running as a bundled executable
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # When running as a script
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 p.display.set_caption('Chess')
-icon = p.image.load('images/bQ.png')
+icon = p.image.load(resource_path('images/bQ.png'))
 p.display.set_icon(icon)
 
 def loadImgs():
     pieces = ['wP', 'wR', 'wN', 'wB', 'wK', 'wQ',
               'bP', 'bR', 'bN', 'bB', 'bK', 'bQ']
     for piece in pieces:
-        images[piece] = p.transform.scale(p.image.load("images/" + piece + ".png"), (sqSize, sqSize))
+        images[piece] = p.transform.scale(
+            p.image.load(resource_path(f"images/{piece}.png")), (sqSize, sqSize)
+            )
 
 
 def main():
