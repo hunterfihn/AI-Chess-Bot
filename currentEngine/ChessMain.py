@@ -120,6 +120,7 @@ def main():
                 if event.type == p.MOUSEBUTTONDOWN:
                     if startButtonRect.collidepoint(event.pos):  # Start game button
                         runMenu = False
+                        setDepth(difficultyChoice)
                         running = True
                     if whitePlayerbuttonRect.collidepoint(event.pos):  # Player 1 button
                         playerOne = not playerOne  # Toggle Player 1 type
@@ -229,7 +230,7 @@ def main():
                 random = rd.random()
 
                 if difficultyChoice == 0: #easy mode
-                    if(random > .25):
+                    if(random > .60):
                         moveFinderProcess = Process(target=chessAI.findRandomMove, args=(validMoves, returnQueue))
                         print("Random Move")
                     else:
@@ -237,7 +238,7 @@ def main():
                         print("Best Move")
 
                 elif difficultyChoice == 1: #medium mode
-                    if(random > .50):
+                    if(random > .70):
                         moveFinderProcess = Process(target=chessAI.findRandomMove, args=(validMoves, returnQueue))
                         print("Random Move")
                     else:
@@ -245,7 +246,7 @@ def main():
                         print("Best Move")
 
                 elif difficultyChoice == 2: #hard mode
-                    if(random > .75):
+                    if(random > .85):
                         moveFinderProcess = Process(target=chessAI.findRandomMove, args=(validMoves, returnQueue))
                         print("Random Move")
                     else:
@@ -402,6 +403,22 @@ def drawMenuText(menu):
     textObject = font.render(text, 0, p.Color("White"))
     textLocation = p.Rect(0, 0, menuWidth, menuHeight).move(menuWidth/2 - textObject.get_width()/2, menuHeight/8 - textObject.get_height()/2)
     menu.blit(textObject, textLocation)
+
+def setDepth(difficultyChoice):
+    depth = 1
+
+    match difficultyChoice:
+        case 0:
+            depth = 1
+        case 1:
+            depth = 2
+        case 2:
+            depth = 3
+        case 3:
+            depth = 4
+
+    chessAI.getDepth(depth)
+    print(depth)
 
 if __name__ == "__main__":
     main()

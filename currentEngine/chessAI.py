@@ -76,7 +76,12 @@ piecePositionScoresTables = {"N": knightScores,
 
 CHECKMATE = 9999
 STALEMATE = 0
-DEPTH = 3
+DEPTH = 4
+
+
+def getDepth(depth):
+    DEPTH = depth
+    print(f"Depth {depth}")
 
 
 def findRandomMove(validMoves, returnQueue):
@@ -85,60 +90,6 @@ def findRandomMove(validMoves, returnQueue):
 def findRandomMoveNoQueue(validMoves):
     return validMoves[rd.randint(0, len(validMoves) - 1)]
 
-'''
-def findBestMoveOld(gs, validMoves):
-    turnMultiplier = 1 if gs.whiteToMove else -1
-    opMinMax = CHECKMATE #from black perspective
-    bestPlayerMove = None
-    rd.shuffle(validMoves)
-    for playerMove in validMoves:
-        gs.makeMove(playerMove)
-        opMoves = gs.getValidMoves()
-        if gs.stalemate:
-            opMaxScore = STALEMATE
-        elif gs.checkmate:
-            opMaxScore = -CHECKMATE
-        else:
-            opMaxScore = -CHECKMATE
-            for move in opMoves:
-                gs.makeMove(move)
-                gs.getValidMoves()
-                if gs.checkmate:
-                    score = CHECKMATE
-                elif gs.stalemate:
-                    score = STALEMATE
-                else:
-                    score = -turnMultiplier * scoreMaterial(gs.board)
-                if score > opMaxScore:
-                    opMaxScore = score
-                gs.undoMove()
-        if opMaxScore < opMinMax:
-            opMinMax = opMaxScore
-            bestPlayerMove = playerMove
-        gs.undoMove()
-    return bestPlayerMove
-
-
-
-def greedyMove(gs, validMoves):
-    turnMultiplier = 1 if gs.whiteToMove else -1
-
-    maxScore = -CHECKMATE #from black perspective
-    bestMove = None
-    for playerMove in validMoves:
-        gs.makeMove(playerMove)
-        if gs.checkmate:
-            score = CHECKMATE
-        elif gs.stalemate:
-            score = 0
-        else:
-            score = turnMultiplier * scoreMaterial(gs.board)
-        if score > maxScore:
-            maxScore = score
-            bestMove = playerMove
-        gs.undoMove()
-    return bestMove
-'''
     
 #helper for negamax/minmax
 def findBestMove(gs, validMoves, returnQueue):
@@ -146,7 +97,6 @@ def findBestMove(gs, validMoves, returnQueue):
     nextMove = None
     rd.shuffle(validMoves)
     counter = 0
-    #findMoveMinMax(gs, validMoves, DEPTH, gs.whiteToMove)
     #negaMax(gs, validMoves, DEPTH, 1 if gs.whiteToMove else -1)
     negaMaxABP(gs, validMoves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
     print(f"Board States Considered: {counter}")
@@ -194,6 +144,7 @@ def negaMaxABP(gs, validMoves, depth, alpha, beta, turnMult):
             break
     return maxScore
 
+
 #positive score = good for white, negative = good for black
 #current boardEval method
 def scoreBoard(gs):
@@ -218,7 +169,7 @@ def scoreBoard(gs):
                         piecePositionScore = piecePositionScoresTables[square[1]][row][col]
                         
                 if square[0] == 'w':
-                    score += pieceValues[square[1]] + piecePositionScore * .5
+                    score += pieceValues[square[1]] + piecePositionScore * .4
                 elif square[0] == 'b':
-                    score -= pieceValues[square[1]] + piecePositionScore * .5
+                    score -= pieceValues[square[1]] + piecePositionScore * .4
     return score

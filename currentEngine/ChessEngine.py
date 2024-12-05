@@ -1,4 +1,3 @@
-
 class gameState():
     def __init__(self):
         #8x8 2d list, each element of list is 2 char
@@ -353,9 +352,6 @@ class gameState():
                     if not attackingPiece or blockingPiece:
                         moves.append(Move((r,c), (r+moveAmount, c+1), self.board, enPassant = True))
                     
-     
-
-            #need to add promotion
     def getRookMoves(self, r, c, moves):
         piecePinned = False
         pinDirection = ()
