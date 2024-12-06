@@ -77,28 +77,31 @@ piecePositionScoresTables = {"N": knightScores,
 
 CHECKMATE = 9999
 STALEMATE = 0
-DEPTH = 3
+#DEPTH = 3
 
 def findRandomMove(validMoves, returnQueue):
+    print("Random Move Made")
     returnQueue.put(validMoves[rd.randint(0, len(validMoves) - 1)])
 
 def findRandomMoveNoQueue(validMoves):
+    print("No moves found -- Making Random move") # Can occur when only king remains
     return validMoves[rd.randint(0, len(validMoves) - 1)]
 
     
 #helper for negamax/minmax
-def findBestMove(gs, validMoves, returnQueue):
+def findBestMove(gs, validMoves, depth, maxDepth, returnQueue):
     global nextMove, counter
     nextMove = None
     rd.shuffle(validMoves)
     counter = 0
     #negaMax(gs, validMoves, DEPTH, 1 if gs.whiteToMove else -1)
-    negaMaxABP(gs, validMoves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
+    negaMaxABP(gs, validMoves, depth, maxDepth, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
     print(f"Board States Considered: {counter}")
+    print("Best Move Made")
     returnQueue.put(nextMove)
 
 
-
+'''
 def negaMax(gs, validMoves, depth, turnMult):
     global nextMove, counter
     counter += 1
@@ -115,8 +118,8 @@ def negaMax(gs, validMoves, depth, turnMult):
                 nextMove = move
         gs.undoMove()
     return maxScore
-
-def negaMaxABP(gs, validMoves, depth, alpha, beta, turnMult):
+'''
+def negaMaxABP(gs, validMoves, depth, maxDepth, alpha, beta, turnMult):
     global nextMove, counter
     counter += 1
     if depth == 0:
@@ -125,12 +128,13 @@ def negaMaxABP(gs, validMoves, depth, alpha, beta, turnMult):
     #move ordering - implement later
     maxScore = -CHECKMATE
     for move in validMoves:
+        print(f"STATE -- DEPTH: {depth}, MAX DEPTH: {maxDepth}")
         gs.makeMove(move, simulating = True)
         nextMoves = gs.getValidMoves()
-        score = -negaMaxABP(gs, nextMoves, depth-1, -beta, -alpha, -turnMult)
+        score = -negaMaxABP(gs, nextMoves, depth-1, maxDepth, -beta, -alpha, -turnMult)
         if score > maxScore:
             maxScore = score
-            if depth == DEPTH:
+            if depth == maxDepth:
                 nextMove = move
         gs.undoMove()
         if maxScore > alpha:

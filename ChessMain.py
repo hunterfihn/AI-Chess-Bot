@@ -238,33 +238,27 @@ def main():
                 AIThinking = True
                 returnQueue = Queue() #passing data between threads
                 random = rd.random()
-
+                depth = maxDepth = difficultyChoice + 1
                 if difficultyChoice == 0: #easy mode
-                    if(random > .55):
-                        moveFinderProcess = Process(target=chessAI.findRandomMove, args=(validMoves, returnQueue))
-                        print("Random Move")
-                    else:
-                        moveFinderProcess = Process(target=chessAI.findBestMove, args=(gs, validMoves, returnQueue))
-                        print("Best Move")
-
-                elif difficultyChoice == 1: #medium mode
-                    if(random > .65):
-                        moveFinderProcess = Process(target=chessAI.findRandomMove, args=(validMoves, returnQueue))
-                        print("Random Move")
-                    else:
-                        moveFinderProcess = Process(target=chessAI.findBestMove, args=(gs, validMoves, returnQueue))
-                        print("Best Move")
-
-                elif difficultyChoice == 2: #hard mode
                     if(random > .75):
                         moveFinderProcess = Process(target=chessAI.findRandomMove, args=(validMoves, returnQueue))
-                        print("Random Move")
                     else:
-                        moveFinderProcess = Process(target=chessAI.findBestMove, args=(gs, validMoves, returnQueue))
-                        print("Best Move")
+                        moveFinderProcess = Process(target=chessAI.findBestMove, args=(gs, validMoves, depth, maxDepth, returnQueue))
+
+                elif difficultyChoice == 1: #medium mode
+                    if(random > .85):
+                        moveFinderProcess = Process(target=chessAI.findRandomMove, args=(validMoves, returnQueue))
+                    else:
+                        moveFinderProcess = Process(target=chessAI.findBestMove, args=(gs, validMoves, depth, maxDepth, returnQueue))
+
+                elif difficultyChoice == 2: #hard mode
+                    if(random > .95):
+                        moveFinderProcess = Process(target=chessAI.findRandomMove, args=(validMoves, returnQueue))
+                    else:
+                        moveFinderProcess = Process(target=chessAI.findBestMove, args=(gs, validMoves, depth, maxDepth, returnQueue))
 
                 elif difficultyChoice == 3: #expert mode
-                    moveFinderProcess = Process(target=chessAI.findBestMove, args=(gs, validMoves, returnQueue))
+                    moveFinderProcess = Process(target=chessAI.findBestMove, args=(gs, validMoves, depth, maxDepth, returnQueue))
 
                 moveFinderProcess.start()
 
