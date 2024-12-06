@@ -24,6 +24,8 @@ class gameState():
         self.stalemate = False
         self.enPassantPossible = ()
         self.enPassantPossibleLog = [self.enPassantPossible]
+        self.AITurn = None
+        self.pawnPromotionCallBack = self.pawnPromotionDefaultAI
 
         self.whiteCastleKingside = True
         self.whiteCastleQueenside = True
@@ -31,8 +33,11 @@ class gameState():
         self.blackCastleQueenside = True
         self.castleRightsLog = [CastleRights(self.whiteCastleKingside, self.blackCastleKingside, 
                                             self.whiteCastleQueenside, self.blackCastleQueenside)]
+        
+    def pawnPromotionDefaultAI(self, color):
+        return "Q"
 
-    def makeMove(self, move, simulating = False):
+    def makeMove(self, move, simulating = False, AITurn = False):
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.toRow][move.toCol] = move.pieceMoved
         self.moveLog.append(move)
@@ -52,14 +57,14 @@ class gameState():
         
         
         if move.pawnPromotion:
-            if simulating:
+            if simulating or AITurn:
                 self.board[move.toRow][move.toCol] = move.pieceMoved[0] + "Q"
             else:
-                '''
-                print("Please chose your promotion: (Q, R, B, N): ")
-                choice = input()
-                '''
-                self.board[move.toRow][move.toCol] = move.pieceMoved[0] + "Q"
+                choice = self.pawnPromotionCallBack(move.pieceMoved[0])
+                self.board[move.toRow][move.toCol] = move.pieceMoved[0] + choice
+                #print("Please chose your promotion: (Q, R, B, N): ")
+                #choice = input()
+                #self.board[move.toRow][move.toCol] = move.pieceMoved[0] + "Q"
 
         self.enPassantPossibleLog.append(self.enPassantPossible)
         
@@ -529,6 +534,10 @@ class Move():
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.toRow][self.toCol]
         self.pawnPromotion = pawnPromotion 
+        if self.pieceMoved == 'wP' and self.toRow == 7:
+            self.isPawnPromotion = True
+        if self.pieceMoved == 'bP' and self.toRow == 0:
+            self.isPawnPromotion = True
         self.enPassant = enPassant
         self.castle = castle
         if enPassant:

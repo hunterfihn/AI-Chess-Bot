@@ -1,5 +1,5 @@
 import random as rd
-import ChessMain
+
 
 # Game Values
 pieceValues = {
@@ -128,7 +128,6 @@ def negaMaxABP(gs, validMoves, depth, maxDepth, alpha, beta, turnMult):
     #move ordering - implement later
     maxScore = -CHECKMATE
     for move in validMoves:
-        print(f"STATE -- DEPTH: {depth}, MAX DEPTH: {maxDepth}")
         gs.makeMove(move, simulating = True)
         nextMoves = gs.getValidMoves()
         score = -negaMaxABP(gs, nextMoves, depth-1, maxDepth, -beta, -alpha, -turnMult)

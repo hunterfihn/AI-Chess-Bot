@@ -155,6 +155,7 @@ def main():
     clock = p.time.Clock()
     screen.fill(p.Color("black"))
     gs = ChessEngine.gameState()
+    gs.pawnPromotionCallback = handlePawnPromotionGUI
 
     moveLogFont = p.font.SysFont("Helvetica", 24, False, False)
 
@@ -266,7 +267,7 @@ def main():
                 AiMove = returnQueue.get()
                 if AiMove is None:
                     AiMove = chessAI.findRandomMoveNoQueue(validMoves)
-                gs.makeMove(AiMove)
+                gs.makeMove(AiMove, AITurn=True)
                 moveMade = True
                 animate = True
                 AIThinking = False
@@ -275,6 +276,11 @@ def main():
             if animate:
                 animateMove(gs.moveLog[-1], screen, gs.board, clock)
             validMoves = gs.getValidMoves()
+            if gs.moveLog[-1].pawnPromotion and gs.AITurn:
+                    # Assuming gs.moveLog[-1] contains a way to identify pawn promotion
+                    color = 'b' if gs.whiteToMove else 'w'
+                    promoted_piece = handlePawnPromotionGUI(color)
+                    gs.board[gs.moveLog[-1].toRow][gs.moveLog[-1].toCol] = color + promoted_piece
             moveMade = False
             animate = False
             moveUndone = False
@@ -408,6 +414,73 @@ def drawMenuText(menu):
     textLocation = p.Rect(0, 0, menuWidth, menuHeight).move(menuWidth/2 - textObject.get_width()/2, menuHeight/8 - textObject.get_height()/2)
     menu.blit(textObject, textLocation)
 
+
+def handlePawnPromotionGUI(color):
+    global sqSize
+    global labelPadding
+    # Define the promotion options
+    pieces = ["Q", "R", "B", "N"]
+    width, height = 400, 100
+    square_size = width // 4  # Size for each square
+
+    # Create a dummy board for the promotion dialog (just the row of pieces)
+    promotion_board = [["--" for _ in range(8)] for _ in range(8)]  # Empty 8x8 board
+    for i, piece in enumerate(pieces):
+        promotion_board[0][i] = color + piece  # Place promotion pieces in the first row (0-3 columns)
+
+    # Create a pygame surface for the promotion dialog
+    promotion_window = p.Surface((width, height))
+    promotion_window.fill((200, 200, 200))  # Light gray background
+
+    # Store the original sqSize and labelPadding
+    original_sqSize = sqSize
+    original_labelPadding = labelPadding
+
+    # Temporarily adjust sqSize and labelPadding for the promotion window
+    # We use square_size for the smaller squares in the promotion window
+    sqSize = square_size
+    labelPadding = 0  # No padding needed for the promotion window
+
+    # Draw the pieces in the promotion window (adjust to the size)
+    for i, piece in enumerate(pieces):
+        piece_image = p.image.load(f"images/{color}{piece}.png")  # Load the piece image
+        piece_image = p.transform.scale(piece_image, (square_size, square_size))  # Scale image to fit the square
+        # Calculate the position to center the piece image
+        x = i * square_size + (square_size - piece_image.get_width()) // 2
+        y = (height - piece_image.get_height()) // 2  # Vertically center the image
+        promotion_window.blit(piece_image, (x, y))
+
+    # Restore the original values
+    sqSize = original_sqSize
+    labelPadding = original_labelPadding
+
+    # Display the promotion window in the center of the screen
+    screen = p.display.get_surface()
+    window_x = screen.get_width() // 2 - width // 2 - 60
+    window_y = screen.get_height() // 2 - height // 2
+    screen.blit(promotion_window, (window_x, window_y))
+    p.display.flip()
+
+    # Wait for the user to click on a piece
+    selected_piece = None
+    while selected_piece is None:
+        for event in p.event.get():
+            if event.type == p.MOUSEBUTTONDOWN:
+                x, y = event.pos
+
+                # Check if the mouse click is within the promotion window
+                if window_x <= x <= window_x + width and window_y <= y <= window_y + height:
+                    # Map the click to the relative x position inside the promotion window
+                    relative_x = x - window_x
+
+                    # Determine which piece was clicked based on the x-coordinate
+                    index = relative_x // square_size
+                    selected_piece = pieces[int(index)]  # Select the clicked piece
+            elif event.type == p.QUIT:
+                p.quit()
+                exit()
+
+    return selected_piece
 
 if __name__ == "__main__":
     main()
